@@ -17,8 +17,12 @@ module TrelloWebhook::Processor
     end
   end
 
-  def ping(payload)
-    puts "[TrelloWebhook::Processor] Hook ping received, hook_id: #{payload[:hook_id]}, #{payload[:zen]}"
+  def show
+    if request.head?
+      puts "[TrelloWebhook::Processor] Hook ping received"
+      p request_body
+      head :ok
+    end
   end
 
   private
@@ -28,7 +32,7 @@ module TrelloWebhook::Processor
   def authenticate_trello_request!
     raise UnspecifiedWebhookSecretError.new unless respond_to?(:webhook_secret)
 
-    normalized_payload = "#{request_url}#{request_body}".unpack('U*').pack('c*')
+    normalized_payload = "#{request_body}#{request_url}".unpack('U*').pack('c*')
     expected_signature = Base64.strict_encode64(OpenSSL::HMAC.digest(HMAC_DIGEST, webhook_secret, normalized_payload))
 
     if signature_header != expected_signature
@@ -56,6 +60,6 @@ module TrelloWebhook::Processor
   end
 
   def event
-    @event ||= json_body["action"]["type"].camelize
+    @event ||= json_body["action"]["type"].underscore
   end
 end

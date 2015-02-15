@@ -10,11 +10,15 @@ module TrelloWebhook
         @headers = {}
         @body = StringIO.new
       end
+
+      def original_url
+        "http://foo.com"
+      end
     end
 
     class ControllerWithoutSecret
       ### Helpers to mock ActionController::Base behavior
-      attr_accessor :request, :pushed
+      attr_accessor :request, :updated
 
       def self.skip_before_filter(*args); end
       def self.before_filter(*args); end
@@ -23,13 +27,13 @@ module TrelloWebhook
 
       include TrelloWebhook::Processor
 
-      def push(payload)
-        @pushed = payload[:foo]
+      def update_card(payload)
+        @updated = payload[:foo]
       end
     end
 
     class Controller < ControllerWithoutSecret
-      def webhook_secret(payload)
+      def webhook_secret
         "secret"
       end
     end
@@ -49,24 +53,21 @@ module TrelloWebhook
         expect { controller_without_secret.send :authenticate_trello_request! }.to raise_error
       end
 
-      it "calls the #push method in controller" do
-        controller.request.body = StringIO.new({ :foo => "bar" }.to_json.to_s)
-        controller.request.headers['X-Hub-Signature'] = "sha1=52b582138706ac0c597c315cfc1a1bf177408a4d"
-        controller.request.headers['X-GitHub-Event'] = 'push'
+      it "calls the #update_card method in controller" do
+        controller.request.body = StringIO.new({ :foo => "bar", :action => { type: 'updateCard' } }.to_json.to_s)
+        controller.request.headers['X-Trello-Webhook'] = "3YUv3UBpzV8IbZrOnIpRC+Cf+Nk="
         controller.send :authenticate_trello_request!  # Manually as we don't have the before_filter logic in our Mock object
         controller.create
-        controller.pushed.should eq "bar"
+        expect(controller.updated).to eq "bar"
       end
 
       it "raises an error when signature does not match" do
         controller.request.body = StringIO.new({ :foo => "bar" }.to_json.to_s)
-        controller.request.headers['X-Hub-Signature'] = "sha1=FOOBAR"
-        controller.request.headers['X-GitHub-Event'] = 'push'
+        controller.request.headers['X-Trello-Webhook'] = "thatsnotrightgeorge"
         expect { controller_without_secret.send :authenticate_trello_request! }.to raise_error
       end
 
       it "raises an error when the trello event method is not implemented" do
-        controller.request.headers['X-GitHub-Event'] = 'unimplemented_event'
         expect { controller_without_secret.create }.to raise_error
       end
     end
