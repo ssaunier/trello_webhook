@@ -27,7 +27,7 @@ First, configure a route to receive the trello webhook POST requests.
 
 ```ruby
 # config/routes.rb
-resource :trello_webhooks, only: :create, defaults: { formats: :json }
+resource :trello_webhooks, only: %i(show create), defaults: { formats: :json }
 ```
 
 Then create a new controller:
@@ -37,8 +37,8 @@ Then create a new controller:
 class TrelloWebhooksController < ActionController::Base
   include TrelloWebhook::Processor
 
-  def push(payload)
-    # TODO: handle push webhook
+  def update_card(payload)
+    # TODO: handle updateCard webhook payload
   end
 
   def webhook_secret
@@ -47,8 +47,7 @@ class TrelloWebhooksController < ActionController::Base
 end
 ```
 
-Add as many instance methods as events you want to handle in
-your controller. You can read the [full list of events](https://developer.trello.com/v3/activity/events/types/) GitHub can notify you about.
+Add as many instance methods as events you want to handle in your controller.
 
 ## Adding the Webhook to a trello board
 
