@@ -5,7 +5,7 @@
 # TrelloWebhook
 
 This gem will help you to quickly setup a route in your Rails application which listens
-to a [Trello webhook](https://developer.trello.com/webhooks/)
+to a [Trello webhook](https://trello.com/docs/api/webhook/index.html)
 
 ## Installation
 
