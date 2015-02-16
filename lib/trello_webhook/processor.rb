@@ -7,13 +7,14 @@ module TrelloWebhook::Processor
 
   class SignatureError < StandardError; end
   class UnspecifiedWebhookSecretError < StandardError; end
+  class CallbackNotImplementedError < StandardError; end
 
   def create
     if self.respond_to? event
       self.send event, json_body
       head(:ok)
     else
-      raise NoMethodError.new("TrelloWebhooksController##{event} not implemented")
+      fail CallbackNotImplementedError, "#{self.class.name}##{event} not implemented"
     end
   end
 
