@@ -10,7 +10,7 @@ Gem::Specification.new do |spec|
   spec.email         = ["seb@saunier.me"]
   spec.summary       = %q{Process Trello Webhooks in your Rails app (Controller mixin)}
   spec.description   = spec.summary
-  spec.homepage      = "https://trello.com/ssaunier/trello_webhook"
+  spec.homepage      = "https://github.com/ssaunier/trello_webhook"
   spec.license       = "MIT"
 
   spec.files         = `git ls-files -z`.split("\x0")
