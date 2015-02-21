@@ -1,4 +1,4 @@
-Copyright (c) 2014 Sebastien Saunier
+Copyright (c) 2015 Sebastien Saunier
 
 MIT License
 

@@ -49,7 +49,14 @@ end
 
 Add as many instance methods as events you want to handle in your controller.
 
-## Adding the Webhook to a trello board
+## Adding the webhook to a given board
 
-TODO
+You need the `ruby-trello` gem.
 
+```ruby
+webhook = Trello::Webhook.new
+webhook.description = "The webhook description"
+webhook.id_model = "The board model id" # Run `Trello::Board.all` to find it.
+webhook.callback_url = "#{ENV['BASE_URL']}/trello_webhooks"  # BASE_URL is your website's url. Use ngrok in dev.
+webhook.save
+```
