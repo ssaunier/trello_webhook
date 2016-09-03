@@ -1,8 +1,11 @@
+require 'openssl'
+require 'base64'
+
 module TrelloWebhook::Processor
   extend ActiveSupport::Concern
 
   included do
-    before_filter :authenticate_trello_request!, :only => :create
+    before_action :authenticate_trello_request!, only: :create
   end
 
   class SignatureError < StandardError; end
@@ -33,12 +36,17 @@ module TrelloWebhook::Processor
   def authenticate_trello_request!
     raise UnspecifiedWebhookSecretError.new unless respond_to?(:webhook_secret)
 
-    normalized_payload = "#{request_body}#{request_url}".unpack('U*').pack('c*')
-    expected_signature = Base64.strict_encode64(OpenSSL::HMAC.digest(HMAC_DIGEST, webhook_secret, normalized_payload))
+    expected = base64digest(base64digest(request_body + request_url))
+    actual = base64digest(signature_header)
 
-    if signature_header != expected_signature
-      raise SignatureError.new "Actual: #{signature_header}, Expected: #{expected_signature}"
+    if actual != expected
+      raise SignatureError.new "Actual: #{actual}, Expected: #{expected}"
     end
+  end
+
+  def base64digest(message)
+    hash = OpenSSL::HMAC.digest('sha1', webhook_secret, message)
+    Base64.strict_encode64(hash)
   end
 
   def request_body
