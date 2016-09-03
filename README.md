@@ -18,7 +18,7 @@ gem 'trello_webhook'
 And then execute:
 
 ```bash
-$ bundle install
+bundle install
 ```
 
 ## Configuration
